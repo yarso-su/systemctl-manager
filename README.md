@@ -30,7 +30,6 @@ Use the `sm` binary to interact with systemd services. When you run the binary, 
 ## Technologies
 
 This is a simple TUI written in Rust using:
-- `clap` for argument parsing
 - `crossterm` for terminal interaction
 
 ## Known Limitations

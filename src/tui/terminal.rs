@@ -1,4 +1,5 @@
 use crossterm::{
+    Command,
     cursor::{Hide, MoveTo, Show},
     queue,
     style::{
@@ -6,12 +7,11 @@ use crossterm::{
         Print, ResetColor, SetBackgroundColor, SetForegroundColor,
     },
     terminal::{
-        disable_raw_mode, enable_raw_mode, size, Clear, ClearType, DisableLineWrap, EnableLineWrap,
-        EnterAlternateScreen, LeaveAlternateScreen, SetTitle,
+        Clear, ClearType, DisableLineWrap, EnableLineWrap, EnterAlternateScreen,
+        LeaveAlternateScreen, SetTitle, disable_raw_mode, enable_raw_mode, size,
     },
-    Command,
 };
-use std::io::{stdout, Error, Write};
+use std::io::{Error, Write, stdout};
 
 mod attribute;
 
@@ -50,10 +50,10 @@ impl Terminal {
         Ok(())
     }
 
-    pub fn move_caret_to(position: Position) -> Result<(), Error> {
+    pub fn move_caret_to(position: RowIdx) -> Result<(), Error> {
         // clippy::as_conversions: See doc above
         #[allow(clippy::as_conversions, clippy::cast_possible_truncation)]
-        Self::queue_command(MoveTo(position.col as u16, position.row as u16))
+        Self::queue_command(MoveTo(0, position as u16))
     }
 
     pub fn hide_caret() -> Result<(), Error> {
@@ -77,7 +77,7 @@ impl Terminal {
     }
 
     pub fn print_row(row: RowIdx, line_text: &str) -> Result<(), Error> {
-        Self::move_caret_to(Position { col: 0, row })?;
+        Self::move_caret_to(row)?;
         Self::clear_line()?;
         Self::print(line_text)
     }
@@ -108,7 +108,7 @@ impl Terminal {
         row: RowIdx,
         annotated_string: &AnnotatedString,
     ) -> Result<(), Error> {
-        Self::move_caret_to(Position { row, col: 0 })?;
+        Self::move_caret_to(row)?;
         Self::clear_line()?;
 
         annotated_string
