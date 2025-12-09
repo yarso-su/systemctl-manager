@@ -2,7 +2,7 @@ use std::{io::Error, process::Command};
 
 mod service;
 
-use super::{super::super::AnnotatedString, SearchResultHighlighter};
+use super::{super::super::AnnotatedString, Highlighter};
 use crate::prelude::*;
 pub use service::Service;
 
@@ -43,14 +43,14 @@ impl Buffer {
     pub fn get_highlighted_string(
         &self,
         line_idx: LineIdx,
-        highlighter: &SearchResultHighlighter,
+        highlighter: &Highlighter,
     ) -> Option<AnnotatedString> {
         self.services
             .get(line_idx)
             .map(|service| service.get_annotated_string(highlighter.get_annotations(line_idx)))
     }
 
-    pub fn highlight(&mut self, idx: LineIdx, highlighter: &mut SearchResultHighlighter) {
+    pub fn highlight(&mut self, idx: LineIdx, highlighter: &mut Highlighter) {
         if let Some(line) = self.services.get(idx) {
             highlighter.highlight(idx, line);
         }

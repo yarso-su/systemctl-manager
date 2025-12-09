@@ -1,15 +1,15 @@
 use std::io::Error;
 
 mod buffer;
+mod highlighter;
 mod searchinfo;
-mod searchresulthighlighter;
 
 use super::super::{Terminal, TuiStatus};
 use super::UIComponent;
 use crate::prelude::*;
 use buffer::Buffer;
+use highlighter::Highlighter;
 use searchinfo::SearchInfo;
-use searchresulthighlighter::SearchResultHighlighter;
 
 #[derive(Default)]
 pub struct View {
@@ -99,8 +99,7 @@ impl UIComponent for View {
             .search_info
             .as_ref()
             .and_then(|search_info| search_info.query.as_deref());
-        let selected_match = query.is_some().then_some(self.location);
-        let mut highlighter = SearchResultHighlighter::new(query, selected_match);
+        let mut highlighter = Highlighter::new(query, self.location);
 
         for current_row in 0..end_y.saturating_add(self.scroll_offset) {
             self.buffer.highlight(current_row, &mut highlighter);

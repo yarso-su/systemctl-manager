@@ -21,9 +21,10 @@ use uicomponents::{UIComponent, View};
 
 #[derive(Eq, PartialEq, Default, Debug)]
 enum Mode {
-    #[default]
+    Filter,
     Search,
-    Select,
+    #[default]
+    Normal,
 }
 
 #[derive(Default)]
@@ -118,7 +119,7 @@ impl Tui {
 
         debug_assert!(new_cursor_pos <= self.terminal_size.height,);
 
-        let _ = Terminal::move_caret_to(new_cursor_pos);
+        // let _ = Terminal::move_caret_to(new_cursor_pos); // TODO: Handle this with modes
         let _ = Terminal::show_caret();
         let _ = Terminal::execute();
     }
