@@ -1,7 +1,12 @@
 [package]
 name = "systemctl-manager"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2024"
+license = "MIT"
+description = "A simple utility to interact with systemd services through a TUI (Vim-Keys)."
+readme = "README.md"
+authors = ["yarso-su (https://github.com/yarso-su)"]
+repository = "https://github.com/yarso-su/systemctl-manager"
 
 [[bin]]
 name = "sm"

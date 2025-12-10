@@ -1,6 +1,8 @@
 # Systemctl Manager (TUI)
 
-A simple utility to interact with systemd services through a TUI, featuring handy shortcuts to make service management easier.
+A simple utility to interact with systemd services through a TUI, featuring handy shortcuts to make service management easier (Vim-Keys).
+
+![Preview](assets/preview.png)
 
 > [!NOTE]
 > This binary is primarily a learning project. While it works for my use case, its main purpose is educational.
@@ -10,7 +12,7 @@ A simple utility to interact with systemd services through a TUI, featuring hand
 
 ## Motivation
 
-When I started using Linux, I interacted with systemd services directly through the `systemctl` command. Over time, I got tired of typing the same commands repeatedly. As a newcomer, I created a small `bash` script with a hardcoded list of common services and a menu to run different commands.
+When I started using Linux, I got tired of typing the same commands repeatedly. As a newcomer, I created a small `bash` script with a hardcoded list of common services and a menu to run different commands.
 
 This project is a re-implementation of that script in Rust, meant to help me learn more about the language and its ecosystem while also extending the original functionality.
 
