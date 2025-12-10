@@ -28,6 +28,12 @@ This project is a re-implementation of that script in Rust, meant to help me lea
 cargo install systemctl-manager
 ```
 
+### AUR
+
+```bash
+yay -S systemctl-manager
+```
+
 ## Usage
 
 Use the `sm` binary to interact with systemd services. When you run the binary, a list of available services will be displayed with vim-like navigation.
