@@ -22,10 +22,10 @@ impl<'a> Highlighter<'a> {
         }
     }
 
-    pub fn highlight(&mut self, idx: LineIdx, service: &Service) {
+    pub fn highlight(&mut self, idx: LineIdx, service: &Service, highligh_selected_line: bool) {
         let mut result = Vec::new();
 
-        let annotation_type = if self.location == idx {
+        let annotation_type = if self.location == idx && highligh_selected_line {
             AnnotationType::SelectedMatch
         } else {
             AnnotationType::Match
@@ -46,7 +46,7 @@ impl<'a> Highlighter<'a> {
                 });
         }
 
-        let result = if self.location == idx {
+        let result = if self.location == idx && highligh_selected_line {
             let mut char_idx = 0;
             let mut annotation_idx = 0;
             let mut selected_annotations = result.clone();

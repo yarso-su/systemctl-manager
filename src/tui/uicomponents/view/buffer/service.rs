@@ -3,23 +3,28 @@ use std::{cmp::min, ops::Range};
 use super::{super::super::super::Annotation, AnnotatedString}; // TODO: Consider moving this module
 use crate::prelude::*;
 
+#[derive(Clone)]
 pub struct Service {
     name: String,
-    pub string: String,
+    string: String,
 }
 
 impl Service {
-    pub fn new(line: &str) -> Option<Self> {
+    pub fn new(line: String) -> Option<Self> {
         let name = line.split_whitespace().next()?;
 
         Some(Self {
             name: name.to_string(),
-            string: String::from(line),
+            string: line,
         })
     }
 
     pub fn len(&self) -> usize {
         self.string.len()
+    }
+
+    pub fn starts_with(&self, query: &str) -> bool {
+        self.name.starts_with(query)
     }
 
     pub fn find_all(&self, query: &str, range: Range<ByteIdx>) -> Vec<ByteIdx> {

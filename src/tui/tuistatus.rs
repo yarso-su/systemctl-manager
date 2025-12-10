@@ -1,5 +1,8 @@
-#[derive(Default, Eq, PartialEq, Debug)]
+use super::Mode;
+
+#[derive(Default, Eq, PartialEq)]
 pub struct TuiStatus {
+    pub mode: Mode,
     pub total_lines: usize,
     pub current_line_idx: usize,
 }

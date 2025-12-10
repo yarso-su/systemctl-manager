@@ -35,11 +35,11 @@ impl From<AnnotationType> for Attribute {
                 }),
             },
             AnnotationType::Selected => Self {
-                foreground: Some(Color::Rgb { r: 0, g: 0, b: 0 }),
+                foreground: None,
                 background: Some(Color::Rgb {
-                    r: 255,
-                    g: 255,
-                    b: 255,
+                    r: 60,
+                    g: 55,
+                    b: 30,
                 }),
             },
         }

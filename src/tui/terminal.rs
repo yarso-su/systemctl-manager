@@ -50,10 +50,10 @@ impl Terminal {
         Ok(())
     }
 
-    pub fn move_caret_to(position: RowIdx) -> Result<(), Error> {
+    pub fn move_caret_to(row: RowIdx, column: Option<ColIdx>) -> Result<(), Error> {
         // clippy::as_conversions: See doc above
         #[allow(clippy::as_conversions, clippy::cast_possible_truncation)]
-        Self::queue_command(MoveTo(0, position as u16))
+        Self::queue_command(MoveTo(column.map_or(0, |col| col as u16), row as u16))
     }
 
     pub fn hide_caret() -> Result<(), Error> {
@@ -77,7 +77,7 @@ impl Terminal {
     }
 
     pub fn print_row(row: RowIdx, line_text: &str) -> Result<(), Error> {
-        Self::move_caret_to(row)?;
+        Self::move_caret_to(row, None)?;
         Self::clear_line()?;
         Self::print(line_text)
     }
@@ -108,7 +108,7 @@ impl Terminal {
         row: RowIdx,
         annotated_string: &AnnotatedString,
     ) -> Result<(), Error> {
-        Self::move_caret_to(row)?;
+        Self::move_caret_to(row, None)?;
         Self::clear_line()?;
 
         annotated_string
