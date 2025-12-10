@@ -1,12 +1,7 @@
-mod location;
-mod position;
 mod size;
 
-pub use location::Location;
-pub use position::Position;
 pub use size::Size;
 
-pub type GraphemeIdx = usize;
 pub type LineIdx = usize;
 pub type ByteIdx = usize;
 pub type ColIdx = usize;

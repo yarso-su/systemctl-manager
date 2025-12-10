@@ -25,6 +25,12 @@ impl Buffer {
         }
     }
 
+    pub fn get_selected_service_name(&self, idx: LineIdx) -> Option<String> {
+        self.get_active_collection()
+            .get(idx)
+            .map(Service::extact_name)
+    }
+
     pub fn height(&self) -> usize {
         self.get_active_collection().len()
     }

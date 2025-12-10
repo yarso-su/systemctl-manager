@@ -30,6 +30,10 @@ impl View {
         self.set_needs_redraw(true);
     }
 
+    pub fn get_selected_service_name(&self) -> Option<String> {
+        self.buffer.get_selected_service_name(self.location)
+    }
+
     pub fn load(&mut self) -> Result<(), Error> {
         let buffer = Buffer::load(self.size.width)?;
 

@@ -9,6 +9,7 @@ mod annotatedstring;
 mod annotation;
 mod annotationtype;
 mod command;
+mod operation;
 mod terminal;
 mod tuistatus;
 mod uicomponents;
@@ -23,6 +24,7 @@ use command::{
     Move::{Down, Up},
     System::{Dismiss, Quit, Resize},
 };
+use operation::{Operation, OperationType};
 use terminal::Terminal;
 use tuistatus::TuiStatus;
 use uicomponents::{FilterBar, MessageBar, SearchBar, StatusBar, UIComponent, View};
@@ -46,16 +48,12 @@ impl Display for Mode {
 }
 
 impl Mode {
-    fn is_normal(&self) -> bool {
-        *self == Self::Normal
+    fn is_search(mode: Self) -> bool {
+        mode == Self::Search
     }
 
-    fn is_search(&self) -> bool {
-        *self == Self::Search
-    }
-
-    fn is_filter(&self) -> bool {
-        *self == Self::Filter
+    fn is_filter(mode: Self) -> bool {
+        mode == Self::Filter
     }
 }
 
@@ -69,18 +67,34 @@ pub struct Tui {
     filter_bar: FilterBar,
     search_bar: SearchBar,
     message_bar: MessageBar,
+    operation: Option<Operation>,
 }
 
 impl Drop for Tui {
     fn drop(&mut self) {
         let _ = Terminal::terminate();
-        if self.should_quit {
-            let _ = Terminal::print("Bye!\r\n");
+
+        if self.should_quit
+            && let Some(operation) = &self.operation
+        {
+            let _ = match operation.execute() {
+                Ok(()) => Terminal::print("✓ Command executed successfully\n"),
+                Err(e) => Terminal::print(format!("✗ Command failed: {e}\n").as_str()),
+            };
         }
     }
 }
 
 impl Tui {
+    fn set_operation_result(&mut self, operation_type: OperationType) {
+        let name = self.view.get_selected_service_name();
+        if let Some(name) = name {
+            self.operation = Some(Operation::new(operation_type, name));
+        }
+
+        self.should_quit = true;
+    }
+
     fn refresh_status(&mut self) {
         self.status_bar
             .update_status(self.view.get_status(self.mode));
@@ -130,24 +144,12 @@ impl Tui {
         Ok(tui)
     }
 
-    // fn handle_quit_command
-    // fn process_command_during_search
-    // fn process_command_during_select
-    // fn process_command
-    // fn evalueate_event
     fn refresh_screen(&mut self) {
         if self.terminal_size.width == 0 || self.terminal_size.height == 0 {
             return;
         }
 
         let _ = Terminal::hide_caret();
-        // let bottom_bar_row = self.terminal_size.height.saturating_sub(1);
-
-        // if self.in_prompt() {
-        //     self.command_bar.render(bottom_bar_row);
-        // } else {
-        //     self.message_bar.render(bottom_bar_row);
-        // }
         self.filter_bar.render(0);
 
         if self.terminal_size.height > 1 {
@@ -156,7 +158,7 @@ impl Tui {
         }
 
         if self.terminal_size.height > 2 {
-            if self.mode.is_search() {
+            if Mode::is_search(self.mode) {
                 self.search_bar
                     .render(self.terminal_size.height.saturating_sub(1));
             } else {
@@ -169,17 +171,12 @@ impl Tui {
             self.view.render(1);
         }
 
-        // let new_cursor_pos = self.view.cursor_position();
-        //
-        // debug_assert!(new_cursor_pos <= self.terminal_size.height,);
-
-        // let _ = Terminal::move_caret_to(new_cursor_pos); // TODO: Handle this with modes
-        if self.mode.is_filter() {
+        if Mode::is_filter(self.mode) {
             let _ = Terminal::move_caret_to(0, Some(self.filter_bar.caret_position_col()));
             let _ = Terminal::show_caret();
         }
 
-        if self.mode.is_search() {
+        if Mode::is_search(self.mode) {
             let _ = Terminal::move_caret_to(
                 self.terminal_size.height.saturating_sub(1),
                 Some(self.search_bar.caret_position_col()),
@@ -219,6 +216,24 @@ impl Tui {
             }
             Edit(Insert('N')) => {
                 self.view.search_prev();
+            }
+            Edit(Insert('w')) => {
+                self.set_operation_result(OperationType::Start);
+            }
+            Edit(Insert('e')) => {
+                self.set_operation_result(OperationType::Stop);
+            }
+            Edit(Insert('r')) => {
+                self.set_operation_result(OperationType::Reload);
+            }
+            Edit(Insert('t')) => {
+                self.set_operation_result(OperationType::Restart);
+            }
+            Edit(Insert('y')) => {
+                self.set_operation_result(OperationType::Enable);
+            }
+            Edit(Insert('u')) => {
+                self.set_operation_result(OperationType::Disable);
             }
             Move(move_command) => {
                 self.view.handle_move_command(move_command);

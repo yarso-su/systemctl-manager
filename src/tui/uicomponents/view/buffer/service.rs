@@ -23,6 +23,10 @@ impl Service {
         self.string.len()
     }
 
+    pub fn extact_name(&self) -> String {
+        self.name.replace(".service", "")
+    }
+
     pub fn starts_with(&self, query: &str) -> bool {
         self.name.starts_with(query)
     }

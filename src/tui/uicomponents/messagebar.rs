@@ -8,7 +8,7 @@ use crate::prelude::*;
 
 const DEFAULT_DURATION: Duration = Duration::new(5, 0);
 const DEFAULT_MESSAGE: &str =
-    "RESTART: w | START: e | STOP: r | ENABLE: t | DISABLE: y | EXIT: ctrl+q";
+    "START: w | STOP: e | RELOAD: r | RESTART: t | ENABLE: y | DISABLE: u | EXIT: ctrl+q";
 
 struct Message {
     text: String,
@@ -64,16 +64,6 @@ impl UIComponent for MessageBar {
 }
 
 impl MessageBar {
-    pub fn update_message(&mut self, new_message: &str) {
-        self.current_message = Message {
-            text: new_message.to_string(),
-            time: Instant::now(),
-        };
-
-        self.cleared_after_expiry = false;
-        self.set_needs_redraw(true);
-    }
-
     pub fn redraw(&mut self) {
         self.set_needs_redraw(true);
     }
