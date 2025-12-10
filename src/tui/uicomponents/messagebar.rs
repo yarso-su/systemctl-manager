@@ -6,9 +6,9 @@ use std::{
 use super::super::{Terminal, uicomponents::UIComponent};
 use crate::prelude::*;
 
-const DEFAULT_DURATION: Duration = Duration::new(5, 0);
+const DEFAULT_DURATION: Duration = Duration::new(3, 0);
 const DEFAULT_MESSAGE: &str =
-    "START: w | STOP: e | RELOAD: r | RESTART: t | ENABLE: y | DISABLE: u | EXIT: ctrl+q";
+    "Start: w | Stop: e | Reload: r | Restart: t | Enable: y | Disable: u | Help: z | Exit: ctrl+q";
 
 struct Message {
     text: String,
@@ -64,6 +64,22 @@ impl UIComponent for MessageBar {
 }
 
 impl MessageBar {
+    pub fn update_message(&mut self, new_message: &str) {
+        self.current_message = Message {
+            text: new_message.to_string(),
+            time: Instant::now(),
+        };
+
+        self.cleared_after_expiry = false;
+        self.set_needs_redraw(true);
+    }
+
+    pub fn clear_message(&mut self) {
+        self.current_message = Message::default();
+        self.cleared_after_expiry = true;
+        self.set_needs_redraw(true);
+    }
+
     pub fn redraw(&mut self) {
         self.set_needs_redraw(true);
     }

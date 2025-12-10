@@ -16,7 +16,6 @@ impl<'a> Iterator for AnnotatedStringIterator<'a> {
             return None;
         }
 
-        // Find the current active annotation
         if let Some(annotation) = self
             .annotated_string
             .annotattions
@@ -37,7 +36,6 @@ impl<'a> Iterator for AnnotatedStringIterator<'a> {
             });
         }
 
-        // Find the boundary of the nearest annotation
         let mut end_idx = self.annotated_string.string.len();
 
         for annotation in &self.annotated_string.annotattions {

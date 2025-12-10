@@ -70,25 +70,22 @@ impl AnnotatedString {
 
         self.string.replace_range(start..end, new_string);
 
-        let replaced_range_len = end.saturating_sub(start); // This is the range we want to replace.
+        let replaced_range_len = end.saturating_sub(start);
         let shortened = new_string.len() < replaced_range_len;
-        let len_differences = new_string.len().abs_diff(replaced_range_len); // This is how much longer or shorter the new range is.
+        let len_differences = new_string.len().abs_diff(replaced_range_len);
 
         if len_differences == 0 {
-            // No adjustments of annotations needed in case the replacement did not result in a change in length.
             return;
         }
 
         self.annotattions.iter_mut().for_each(|annotation| {
             annotation.start = if annotation.start >= end {
-                // For annotations starting after the replaced range, we move the start index by the difference in lenght.
                 if shortened {
                     annotation.start.saturating_sub(len_differences)
                 } else {
                     annotation.start.saturating_add(len_differences)
                 }
             } else if annotation.start >= start {
-                // For annotations starting within the replaced range, we move the start index by the difference in length, constrained to the beginning or end of the replaced range.
                 if shortened {
                     max(start, annotation.start.saturating_sub(len_differences))
                 } else {
@@ -99,14 +96,12 @@ impl AnnotatedString {
             };
 
             annotation.end = if annotation.end >= end {
-                // For annotations ending after the replaced range, we move the index by the difference in length.
                 if shortened {
                     annotation.end.saturating_sub(len_differences)
                 } else {
                     annotation.end.saturating_add(len_differences)
                 }
             } else if annotation.end >= start {
-                // For annotations ending within the replaced range, we move the end index by the difference in length, constrained to the beginning or end of the replaced range.
                 if shortened {
                     max(start, annotation.end.saturating_sub(len_differences))
                 } else {
@@ -117,7 +112,6 @@ impl AnnotatedString {
             }
         });
 
-        // Filter out empty annotations, in case the previous step resulted in any.
         self.annotattions.retain(|annotation| {
             annotation.start < annotation.end && annotation.start < self.string.len()
         });

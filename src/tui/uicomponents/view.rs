@@ -53,22 +53,14 @@ impl View {
 
     fn scroll(&mut self, to: RowIdx) {
         let Size { height, .. } = self.size;
-        // let offset_changed =
-        // self.scroll_offset = to;
+
         if to < self.scroll_offset {
             self.scroll_offset = to;
-            // true
         } else if to >= self.scroll_offset.saturating_add(height) {
             self.scroll_offset = to.saturating_sub(height).saturating_add(1);
-            // true
         }
-        // else {
-        //     false
-        // };
 
-        // if offset_changed {
-        self.set_needs_redraw(true); // We are not using the cursor as position indicator, so we need to redraw the entire view.
-        // }
+        self.set_needs_redraw(true); // We are not using the cursor as location indicator, so we need to redraw the entire view.
     }
 
     fn location_to_position(&self) -> RowIdx {
@@ -97,11 +89,6 @@ impl View {
         Terminal::print_row(at, line_text)
     }
 
-    // pub fn cursor_position(&self) -> RowIdx {
-    //     self.location_to_position()
-    //         .saturating_sub(self.scroll_offset)
-    // }
-
     fn snap_to_valid_line(&mut self) {
         self.location = min(self.location, self.buffer.height().saturating_sub(1));
     }
@@ -115,21 +102,29 @@ impl View {
         self.snap_to_valid_line();
     }
 
-    // review
-    /// Edge case: No services
     pub fn scroll_to_start(&mut self) {
         self.move_up(self.location);
         self.scroll(self.location_to_position());
     }
 
-    pub fn handle_move_command(&mut self, command: Move) {
+    pub fn handle_move_command(&mut self, command: Move, multiplier: Option<usize>) {
         let Size { height, .. } = self.size;
 
-        // This match moves the position, but does not check for all boundaries.
-        // The final boundarline checking happens after the match statement.
         match command {
-            Move::Up => self.move_up(1),
-            Move::Down => self.move_down(1),
+            Move::Up => {
+                if let Some(multiplier) = multiplier {
+                    self.move_up(multiplier);
+                } else {
+                    self.move_up(1);
+                }
+            }
+            Move::Down => {
+                if let Some(multiplier) = multiplier {
+                    self.move_down(multiplier);
+                } else {
+                    self.move_down(1);
+                }
+            }
             Move::PageUp => self.move_up(height.saturating_sub(1)),
             Move::PageDown => self.move_down(height.saturating_sub(1)),
         }
@@ -143,28 +138,15 @@ impl View {
     }
 
     fn get_search_query(&self) -> Option<&String> {
-        // let query = self
-        //     .search_info
-        //     .as_ref()
-        //     .and_then(|search_info| search_info.query.as_ref());
-        //
-        // debug_assert!(
-        //     query.is_some(),
-        //     "Attempting to search with malformed searchinfo present"
-        // );
-        //
-        // query
-
         self.search_info
             .as_ref()
             .and_then(|search_info| search_info.query.as_ref())
     }
 
     fn search_in_direction(&mut self, from: LineIdx, direction: SearchDirection) {
-        // Review possible bug. SearchInfo is not cleared when exiting search mode
+        // Review possible bug. SearchInfo is not cleared when exiting search mode to keep prev/next search
         if let Some(location) = self.get_search_query().and_then(|query| {
             if query.is_empty() {
-                // debug_assert!(false, "none - al");
                 None
             } else if direction == SearchDirection::Forward {
                 self.buffer.search_forward(query, from)
@@ -211,7 +193,7 @@ impl View {
         if let Some(search_info) = &self.search_info {
             self.location = search_info.prev_location;
             self.scroll_offset = search_info.prev_scroll_offset;
-            self.scroll_location_into_view(); // ensure the previous location is still visible even if the terminal has been resized
+            self.scroll_location_into_view();
         }
 
         self.search_info = None;
@@ -248,9 +230,6 @@ impl UIComponent for View {
         }
 
         for current_row in origin_row..end_y {
-            // to get the correct line index, we have to take current_row (the absolute row on screen),
-            // subtract origin_row to get the current row relative to the view (ranging from 0 to self.size.height)
-            // and add the scroll offset
             let line_idx = current_row
                 .saturating_sub(origin_row)
                 .saturating_add(self.scroll_offset);

@@ -76,7 +76,6 @@ impl Buffer {
             .map(|service| service.get_annotated_string(highlighter.get_annotations(line_idx)))
     }
 
-    // Review performance, it clones the whole buffer each time the user types a character
     pub fn filter(&mut self, query: &str) {
         if query.is_empty() {
             self.filtered = None;

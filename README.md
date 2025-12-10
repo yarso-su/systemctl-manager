@@ -1,4 +1,8 @@
-# Systemctl Manager (TUI)
+# Systemctl Manager - TUI 🔧
+
+[![Crates.io](https://img.shields.io/crates/v/systemctl-manager.svg)](https://crates.io/crates/systemctl-manager)
+[![License](https://img.shields.io/crates/l/systemctl-manager.svg)](LICENSE)
+[![Downloads](https://img.shields.io/crates/d/systemctl-manager.svg)](https://crates.io/crates/systemctl-manager)
 
 A simple utility to interact with systemd services through a TUI, featuring handy shortcuts to make service management easier (Vim-Keys).
 
@@ -16,10 +20,22 @@ When I started using Linux, I got tired of typing the same commands repeatedly. 
 
 This project is a re-implementation of that script in Rust, meant to help me learn more about the language and its ecosystem while also extending the original functionality.
 
+## Installation
+
+### Cargo
+
+```bash
+cargo install systemctl-manager
+```
+
 ## Usage
 
 Use the `sm` binary to interact with systemd services. When you run the binary, a list of available services will be displayed with vim-like navigation.
 
+> [!NOTE]
+> Operations that modify services (start, stop, restart, enable, disable) require `sudo` privileges. The application will prompt for your password when needed.
+
+**Key bindings:**
 **Key bindings:**
 - Navigate using arrow keys or vim-like keys (`j`/`k`)
 - Press `i`/`a`/`I`/`A` to filter services by name
@@ -33,7 +49,7 @@ Use the `sm` binary to interact with systemd services. When you run the binary, 
 - Press `Ctrl+q` to quit the application
 
 **Exiting alternative modes:**
-- Press `Ctrl+C` or `Esc` to dismiss the current mode
+- Press `Ctrl+c` or `Esc` to dismiss the current mode
 - Press `Enter` to confirm the current mode
 
 ## Known Limitations
@@ -45,7 +61,20 @@ Feel free to fork the project, open issues, or contribute suggestions.
 ### Missing Features
 
 - Support for multiple selections
-- Support for vim-like multiplied movement actions
+
+## Contributing
+
+This is primarily a learning project, but contributions are welcome! Feel free to:
+
+- Open issues for bugs or feature requests
+- Submit pull requests
+- Share feedback on the code
+
+## Acknowledgments
+
+Built with:
+- [crossterm](https://github.com/crossterm-rs/crossterm) - Terminal manipulation
+- [Rust](https://www.rust-lang.org/) - Because learning is fun
 
 ## License
 

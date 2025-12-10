@@ -68,6 +68,7 @@ pub struct Tui {
     search_bar: SearchBar,
     message_bar: MessageBar,
     operation: Option<Operation>,
+    multiplier: Option<String>,
 }
 
 impl Drop for Tui {
@@ -86,6 +87,22 @@ impl Drop for Tui {
 }
 
 impl Tui {
+    fn append_multiplier(&mut self, digit: char) {
+        if let Some(multiplier) = self.multiplier.as_mut() {
+            multiplier.push(digit);
+        } else {
+            self.multiplier = Some(String::from(digit));
+        }
+    }
+
+    fn get_multiplier(&self) -> Option<usize> {
+        if let Some(multiplier) = self.multiplier.as_ref() {
+            multiplier.parse().ok()
+        } else {
+            None
+        }
+    }
+
     fn set_operation_result(&mut self, operation_type: OperationType) {
         let name = self.view.get_selected_service_name();
         if let Some(name) = name {
@@ -107,7 +124,7 @@ impl Tui {
             height: size.height.saturating_sub(3),
             width: size.width,
         });
-        //
+
         let bar_size = Size {
             height: 1,
             width: size.width,
@@ -117,8 +134,6 @@ impl Tui {
         self.filter_bar.resize(bar_size);
         self.message_bar.resize(bar_size);
         self.search_bar.resize(bar_size);
-        // self.message_bar.resize(bar_size);
-        // self.command_bar.resize(bar_size);
     }
 
     pub fn new() -> Result<Self, Error> {
@@ -130,13 +145,12 @@ impl Tui {
 
         Terminal::initialize()?;
 
-        let mut tui = Self::default(); // mut
+        let mut tui = Self::default();
         let size = Terminal::size().unwrap_or_default();
 
         tui.view.set_hilight_selected_line(true);
         tui.handle_resize_command(size);
         tui.view.load()?;
-        //editor.update_message("HELP: Ctrl-F = find | Ctrl-S = save | Ctrl-Q = quit");
         tui.refresh_status();
 
         Terminal::set_title("systemctl-manager")?;
@@ -193,6 +207,18 @@ impl Tui {
             return;
         }
 
+        if let Edit(Insert('0'..='9')) = command
+            && let Edit(Insert(ch)) = command
+        {
+            self.append_multiplier(ch);
+
+            if let Some(multiplier) = &self.multiplier {
+                self.message_bar.update_message(multiplier);
+            }
+
+            return;
+        }
+
         match command {
             Edit(Insert('/')) => {
                 self.mode = Mode::Search;
@@ -204,12 +230,10 @@ impl Tui {
 
                 self.view.set_hilight_selected_line(false);
                 self.view.scroll_to_start();
+                self.message_bar.clear_message();
             }
-            Edit(Insert('j')) => {
-                self.view.handle_move_command(Down);
-            }
-            Edit(Insert('k')) => {
-                self.view.handle_move_command(Up);
+            Edit(Insert('z')) => {
+                self.message_bar.update_message("Filter mode: i/a/I/A | Search mode: / | Dismiss: ctrl+c/esc | Confirm: enter | Search next: n | Search prev: N");
             }
             Edit(Insert('n')) => {
                 self.view.search_next();
@@ -235,11 +259,35 @@ impl Tui {
             Edit(Insert('u')) => {
                 self.set_operation_result(OperationType::Disable);
             }
+            Edit(Insert('j')) => {
+                let multiplier = self.get_multiplier();
+                self.view.handle_move_command(Down, multiplier);
+
+                if multiplier.is_some() {
+                    self.message_bar.clear_message();
+                }
+            }
+            Edit(Insert('k')) => {
+                let multiplier = self.get_multiplier();
+                self.view.handle_move_command(Up, multiplier);
+
+                if multiplier.is_some() {
+                    self.message_bar.clear_message();
+                }
+            }
             Move(move_command) => {
-                self.view.handle_move_command(move_command);
+                let multiplier = self.get_multiplier();
+                self.view.handle_move_command(move_command, multiplier);
+
+                if multiplier.is_some() {
+                    self.message_bar.clear_message();
+                }
             }
             _ => {}
         }
+
+        self.message_bar.redraw();
+        self.multiplier.take();
     }
 
     fn process_command_during_filter(&mut self, command: Command) {

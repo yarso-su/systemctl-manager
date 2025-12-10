@@ -29,7 +29,6 @@ impl UIComponent for StatusBar {
         let remainder_len = self.size.width.saturating_sub(mode_text.len());
         let status = format!("{mode_text}{position_indicator:>remainder_len$}");
 
-        // Only print out the status if it fits. Otherwise write out an empty string to ensure the row is cleared
         let to_print = if status.len() <= self.size.width {
             status
         } else {

@@ -48,7 +48,6 @@ impl FilterBar {
             Edit::Delete | Edit::InsertNewLine => {}
             DeleteBackward => {
                 self.value.pop();
-                // debug_assert!(false, "{}", self.value);
             }
         }
 

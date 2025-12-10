@@ -51,7 +51,6 @@ impl Service {
     }
 
     pub fn get_annotated_string(&self, annotations: Option<&Vec<Annotation>>) -> AnnotatedString {
-        // debug_assert!(false, "{}", self.string);
         let mut result = AnnotatedString::from(&self.string);
 
         if let Some(annotations) = annotations {
