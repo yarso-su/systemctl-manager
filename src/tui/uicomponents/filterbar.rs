@@ -7,7 +7,7 @@ use super::super::{
 };
 use crate::prelude::*;
 
-const PROMT: &str = "> ";
+const PROMT: &str = "$ ";
 
 #[derive(Default)]
 pub struct FilterBar {
@@ -63,10 +63,5 @@ impl FilterBar {
 
     pub fn value(&self) -> String {
         self.value.clone()
-    }
-
-    pub fn clear_value(&mut self) {
-        self.value.clear();
-        self.set_needs_redraw(true);
     }
 }

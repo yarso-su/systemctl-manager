@@ -99,4 +99,52 @@ impl Buffer {
             highlighter.highlight(idx, line, highligh_selected_line);
         }
     }
+
+    pub fn search_forward(&self, query: &str, from: LineIdx) -> Option<LineIdx> {
+        if query.is_empty() {
+            return None;
+        }
+
+        for (line_idx, service) in self
+            .get_active_collection()
+            .iter()
+            .enumerate()
+            .cycle()
+            .skip(from)
+            .take(self.get_active_collection().len())
+        {
+            if service.contains(query) {
+                return Some(line_idx);
+            }
+        }
+
+        None
+    }
+
+    pub fn search_backward(&self, query: &str, from: LineIdx) -> Option<LineIdx> {
+        if query.is_empty() {
+            return None;
+        }
+
+        for (line_idx, service) in self
+            .get_active_collection()
+            .iter()
+            .enumerate()
+            .rev()
+            .cycle()
+            .skip(
+                self.get_active_collection()
+                    .len()
+                    .saturating_sub(from)
+                    .saturating_sub(1),
+            )
+            .take(self.get_active_collection().len())
+        {
+            if service.contains(query) {
+                return Some(line_idx);
+            }
+        }
+
+        None
+    }
 }

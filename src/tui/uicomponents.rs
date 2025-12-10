@@ -7,6 +7,7 @@ mod view;
 
 pub use filterbar::FilterBar;
 pub use messagebar::MessageBar;
+pub use searchbar::SearchBar;
 pub use statusbar::StatusBar;
 pub use uicomponent::UIComponent;
 pub use view::View;

@@ -25,7 +25,7 @@ use command::{
 };
 use terminal::Terminal;
 use tuistatus::TuiStatus;
-use uicomponents::{FilterBar, MessageBar, StatusBar, UIComponent, View};
+use uicomponents::{FilterBar, MessageBar, SearchBar, StatusBar, UIComponent, View};
 
 #[derive(Eq, PartialEq, Default, Clone, Copy)]
 pub enum Mode {
@@ -67,6 +67,7 @@ pub struct Tui {
     view: View,
     status_bar: StatusBar,
     filter_bar: FilterBar,
+    search_bar: SearchBar,
     message_bar: MessageBar,
 }
 
@@ -101,6 +102,7 @@ impl Tui {
         self.status_bar.resize(bar_size);
         self.filter_bar.resize(bar_size);
         self.message_bar.resize(bar_size);
+        self.search_bar.resize(bar_size);
         // self.message_bar.resize(bar_size);
         // self.command_bar.resize(bar_size);
     }
@@ -154,8 +156,13 @@ impl Tui {
         }
 
         if self.terminal_size.height > 2 {
-            self.message_bar
-                .render(self.terminal_size.height.saturating_sub(1));
+            if self.mode.is_search() {
+                self.search_bar
+                    .render(self.terminal_size.height.saturating_sub(1));
+            } else {
+                self.message_bar
+                    .render(self.terminal_size.height.saturating_sub(1));
+            }
         }
 
         if self.terminal_size.height > 3 {
@@ -172,6 +179,14 @@ impl Tui {
             let _ = Terminal::show_caret();
         }
 
+        if self.mode.is_search() {
+            let _ = Terminal::move_caret_to(
+                self.terminal_size.height.saturating_sub(1),
+                Some(self.search_bar.caret_position_col()),
+            );
+            let _ = Terminal::show_caret();
+        }
+
         let _ = Terminal::execute();
     }
 
@@ -184,14 +199,14 @@ impl Tui {
         match command {
             Edit(Insert('/')) => {
                 self.mode = Mode::Search;
-                // enter search mode
+                self.view.enter_search();
+                self.search_bar.redraw();
             }
             Edit(Insert('i' | 'I' | 'a' | 'A')) => {
                 self.mode = Mode::Filter;
 
                 self.view.set_hilight_selected_line(false);
                 self.view.scroll_to_start();
-                // enter filter mode
             }
             Edit(Insert('j')) => {
                 self.view.handle_move_command(Down);
@@ -199,21 +214,17 @@ impl Tui {
             Edit(Insert('k')) => {
                 self.view.handle_move_command(Up);
             }
+            Edit(Insert('n')) => {
+                self.view.search_next();
+            }
+            Edit(Insert('N')) => {
+                self.view.search_prev();
+            }
             Move(move_command) => {
                 self.view.handle_move_command(move_command);
             }
             _ => {}
         }
-
-        // match command {
-        //     // System(Quit | Resize(_) | Dismiss) => {}
-        //     // System(Search) => self.set_prompt(PromptType::Search),
-        //     // System(Save) => self.handle_save_command(),
-        //     // Edit(InsertNewLine) => {}
-        //     Move(move_command) => self.view.handle_move_command(move_command),
-        //     _ => {}
-        // }
-        // TODO
     }
 
     fn process_command_during_filter(&mut self, command: Command) {
@@ -231,8 +242,31 @@ impl Tui {
         }
     }
 
-    fn process_command_during_search(&self, _command: Command) {
-        // TODO: Implement this
+    fn process_command_during_search(&mut self, command: Command) {
+        match command {
+            System(Dismiss) => {
+                self.mode = Mode::Normal;
+                self.view.dismiss_search();
+                self.message_bar.redraw();
+                self.search_bar.clear_value();
+            }
+            Edit(InsertNewLine) => {
+                self.mode = Mode::Normal;
+                self.view.exit_search();
+                self.message_bar.redraw();
+            }
+            Edit(command) => {
+                self.search_bar.handle_edit_command(command);
+                self.view.search(&self.search_bar.value());
+            }
+            Move(Down) => {
+                self.view.search_next();
+            }
+            Move(Up) => {
+                self.view.search_prev();
+            }
+            _ => {}
+        }
     }
 
     fn process_command(&mut self, command: Command) {

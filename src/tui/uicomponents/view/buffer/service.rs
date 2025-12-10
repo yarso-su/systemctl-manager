@@ -27,6 +27,10 @@ impl Service {
         self.name.starts_with(query)
     }
 
+    pub fn contains(&self, query: &str) -> bool {
+        self.string.contains(query)
+    }
+
     pub fn find_all(&self, query: &str, range: Range<ByteIdx>) -> Vec<ByteIdx> {
         let end = min(range.end, self.string.len());
         let start = range.start;

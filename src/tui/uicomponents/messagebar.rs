@@ -7,6 +7,8 @@ use super::super::{Terminal, uicomponents::UIComponent};
 use crate::prelude::*;
 
 const DEFAULT_DURATION: Duration = Duration::new(5, 0);
+const DEFAULT_MESSAGE: &str =
+    "RESTART: w | START: e | STOP: r | ENABLE: t | DISABLE: y | EXIT: ctrl+q";
 
 struct Message {
     text: String,
@@ -16,7 +18,7 @@ struct Message {
 impl Default for Message {
     fn default() -> Self {
         Self {
-            text: String::from("FILTER: [i a I A] SEARCH: [/] QUIT: [ctrl+q]"),
+            text: String::from(DEFAULT_MESSAGE),
             time: Instant::now(),
         }
     }
@@ -52,7 +54,7 @@ impl UIComponent for MessageBar {
         }
 
         let message = if self.current_message.is_expired() {
-            "Hello world"
+            DEFAULT_MESSAGE
         } else {
             &self.current_message.text
         };
@@ -69,6 +71,10 @@ impl MessageBar {
         };
 
         self.cleared_after_expiry = false;
+        self.set_needs_redraw(true);
+    }
+
+    pub fn redraw(&mut self) {
         self.set_needs_redraw(true);
     }
 }
