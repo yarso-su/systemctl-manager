@@ -7,8 +7,7 @@ use super::super::{Terminal, uicomponents::UIComponent};
 use crate::prelude::*;
 
 const DEFAULT_DURATION: Duration = Duration::new(3, 0);
-const DEFAULT_MESSAGE: &str =
-    "Start: w | Stop: e | Reload: r | Restart: t | Enable: y | Disable: u | Help: z | Exit: ctrl+q";
+const DEFAULT_MESSAGE: &str = "status: q | start: w | stop: e | reload: r | restart: t | enable: y | disable: u | help: z | exit: ctrl+q";
 
 struct Message {
     text: String,

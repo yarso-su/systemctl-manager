@@ -5,7 +5,9 @@ pub struct Operation {
     pub name: String,
 }
 
+#[derive(PartialEq)]
 pub enum OperationType {
+    Status,
     Start,
     Stop,
     Reload,
@@ -22,8 +24,13 @@ impl Operation {
         }
     }
 
-    pub fn execute(&self) -> std::io::Result<()> {
+    fn needs_sudo(&self) -> bool {
+        self.operation_type != OperationType::Status
+    }
+
+    pub fn execute(&self) -> std::io::Result<std::process::Output> {
         let operation_type = match self.operation_type {
+            OperationType::Status => "status",
             OperationType::Start => "start",
             OperationType::Stop => "stop",
             OperationType::Reload => "reload",
@@ -32,10 +39,14 @@ impl Operation {
             OperationType::Disable => "disable",
         };
 
-        Command::new("sudo")
-            .args(["systemctl", operation_type, &self.name])
-            .status()?;
-
-        Ok(())
+        if self.needs_sudo() {
+            Command::new("sudo")
+                .args(["systemctl", operation_type, &self.name])
+                .output()
+        } else {
+            Command::new("systemctl")
+                .args([operation_type, &self.name])
+                .output()
+        }
     }
 }

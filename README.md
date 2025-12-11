@@ -67,6 +67,7 @@ Feel free to fork the project, open issues, or contribute suggestions.
 ### Missing Features
 
 - Support for multiple selections
+- Should operation keybindings be moved to a secondary menu to make the default message bar clearer?
 
 ## Contributing
 

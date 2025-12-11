@@ -78,10 +78,15 @@ impl Drop for Tui {
         if self.should_quit
             && let Some(operation) = &self.operation
         {
-            let _ = match operation.execute() {
-                Ok(()) => Terminal::print("✓ Command executed successfully\n"),
-                Err(e) => Terminal::print(format!("✗ Command failed: {e}\n").as_str()),
-            };
+            if let Ok(result) = operation.execute() {
+                if !result.stdout.is_empty() {
+                    let _ = Terminal::print(&String::from_utf8_lossy(&result.stdout));
+                } else if !result.stderr.is_empty() {
+                    let _ = Terminal::print(&String::from_utf8_lossy(&result.stderr));
+                }
+            } else {
+                let _ = Terminal::print("Command failed\n");
+            }
         }
     }
 }
@@ -233,13 +238,16 @@ impl Tui {
                 self.message_bar.clear_message();
             }
             Edit(Insert('z')) => {
-                self.message_bar.update_message("Filter mode: i/a/I/A | Search mode: / | Dismiss: ctrl+c/esc | Confirm: enter | Search next: n | Search prev: N");
+                self.message_bar.update_message("filter mode: i/a/I/A | search mode: / | dismiss: ctrl+c/esc | confirm: enter | search next: n | search prev: N");
             }
             Edit(Insert('n')) => {
                 self.view.search_next();
             }
             Edit(Insert('N')) => {
                 self.view.search_prev();
+            }
+            Edit(Insert('q')) => {
+                self.set_operation_result(OperationType::Status);
             }
             Edit(Insert('w')) => {
                 self.set_operation_result(OperationType::Start);
