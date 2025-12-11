@@ -6,7 +6,7 @@
 
 A simple utility to interact with systemd services through a TUI, featuring handy shortcuts to make service management easier (Vim-Keys).
 
-![Preview](assets/preview.png)
+![Preview](assets/preview.gif)
 
 > [!NOTE]
 > This binary is primarily a learning project. While it works for my use case, its main purpose is educational.
