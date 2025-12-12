@@ -1,6 +1,6 @@
 [package]
 name = "systemctl-manager"
-version = "1.0.2"
+version = "1.0.3"
 edition = "2024"
 license = "MIT"
 description = "A simple utility to interact with systemd services through a TUI (Vim-Keys)."

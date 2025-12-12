@@ -78,15 +78,7 @@ impl Drop for Tui {
         if self.should_quit
             && let Some(operation) = &self.operation
         {
-            if let Ok(result) = operation.execute() {
-                if !result.stdout.is_empty() {
-                    let _ = Terminal::print(&String::from_utf8_lossy(&result.stdout));
-                } else if !result.stderr.is_empty() {
-                    let _ = Terminal::print(&String::from_utf8_lossy(&result.stderr));
-                }
-            } else {
-                let _ = Terminal::print("Command failed\n");
-            }
+            operation.execute();
         }
     }
 }

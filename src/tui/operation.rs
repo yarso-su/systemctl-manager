@@ -1,3 +1,4 @@
+use super::Terminal;
 use std::process::Command;
 
 pub struct Operation {
@@ -28,7 +29,7 @@ impl Operation {
         self.operation_type != OperationType::Status
     }
 
-    pub fn execute(&self) -> std::io::Result<std::process::Output> {
+    pub fn execute(&self) {
         let operation_type = match self.operation_type {
             OperationType::Status => "status",
             OperationType::Start => "start",
@@ -40,13 +41,19 @@ impl Operation {
         };
 
         if self.needs_sudo() {
-            Command::new("sudo")
+            if Command::new("sudo")
                 .args(["systemctl", operation_type, &self.name])
-                .output()
-        } else {
-            Command::new("systemctl")
-                .args([operation_type, &self.name])
-                .output()
+                .status()
+                .is_err()
+            {
+                let _ = Terminal::print("Command failed\r\n");
+            }
+
+            return;
         }
+
+        let _ = Command::new("systemctl")
+            .args([operation_type, &self.name])
+            .status();
     }
 }
