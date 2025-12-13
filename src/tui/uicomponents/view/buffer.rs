@@ -28,7 +28,7 @@ impl Buffer {
     pub fn get_selected_service_name(&self, idx: LineIdx) -> Option<String> {
         self.get_active_collection()
             .get(idx)
-            .map(Service::extact_name)
+            .map(Service::extract_name)
     }
 
     pub fn height(&self) -> usize {
@@ -55,9 +55,7 @@ impl Buffer {
             let mut line = String::from(line);
             line.push_str(&fill);
 
-            if let Some(service) = Service::new(line) {
-                services.push(service);
-            }
+            services.push(Service::new(line));
         }
 
         Ok(Self {

@@ -1,34 +1,30 @@
 use std::{cmp::min, ops::Range};
 
-use super::{super::super::super::Annotation, AnnotatedString}; // TODO: Consider moving this module
+use super::{super::super::super::Annotation, AnnotatedString};
 use crate::prelude::*;
 
 #[derive(Clone)]
 pub struct Service {
-    name: String,
     string: String,
 }
 
 impl Service {
-    pub fn new(line: String) -> Option<Self> {
-        let name = line.split_whitespace().next()?;
-
-        Some(Self {
-            name: name.to_string(),
-            string: line,
-        })
+    pub fn new(line: String) -> Self {
+        Self { string: line }
     }
 
     pub fn len(&self) -> usize {
         self.string.len()
     }
 
-    pub fn extact_name(&self) -> String {
-        self.name.replace(".service", "")
+    pub fn extract_name(&self) -> String {
+        self.string
+            .split_once(".service")
+            .map_or_else(String::new, |(name, _)| name.to_string())
     }
 
     pub fn starts_with(&self, query: &str) -> bool {
-        self.name.starts_with(query)
+        self.string.starts_with(query)
     }
 
     pub fn contains(&self, query: &str) -> bool {
