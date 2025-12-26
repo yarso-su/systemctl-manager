@@ -63,4 +63,9 @@ impl FilterBar {
     pub fn value(&self) -> String {
         self.value.clone()
     }
+
+    pub fn clear_value(&mut self) {
+        self.value = String::default();
+        self.set_needs_redraw(true);
+    }
 }

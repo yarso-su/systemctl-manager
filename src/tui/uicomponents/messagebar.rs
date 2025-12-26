@@ -7,7 +7,8 @@ use super::super::{Terminal, uicomponents::UIComponent};
 use crate::prelude::*;
 
 const DEFAULT_DURATION: Duration = Duration::new(3, 0);
-const DEFAULT_MESSAGE: &str = "status: q | start: w | stop: e | reload: r | restart: t | enable: y | disable: u | help: z | exit: ctrl+q";
+const DEFAULT_MESSAGE_LEFT: &str = "alternate loaded/all: f";
+const DEFAULT_MESSAGE_RIGHT: &str = "show keys: o | help: p | exit: ctrl+q";
 
 struct Message {
     text: String,
@@ -17,7 +18,7 @@ struct Message {
 impl Default for Message {
     fn default() -> Self {
         Self {
-            text: String::from(DEFAULT_MESSAGE),
+            text: String::new(),
             time: Instant::now(),
         }
     }
@@ -34,6 +35,7 @@ pub struct MessageBar {
     current_message: Message,
     needs_redraw: bool,
     cleared_after_expiry: bool,
+    size: Size,
 }
 
 impl UIComponent for MessageBar {
@@ -45,15 +47,18 @@ impl UIComponent for MessageBar {
         (!self.cleared_after_expiry && self.current_message.is_expired()) || self.needs_redraw
     }
 
-    fn set_size(&mut self, _size: Size) {}
+    fn set_size(&mut self, size: Size) {
+        self.size = size;
+    }
 
     fn draw(&mut self, origin_y: RowIdx) -> Result<(), Error> {
         if self.current_message.is_expired() {
             self.cleared_after_expiry = true;
         }
 
-        let message = if self.current_message.is_expired() {
-            DEFAULT_MESSAGE
+        let message = if self.current_message.is_expired() || self.current_message.text.is_empty() {
+            let remainder_len = self.size.width.saturating_sub(DEFAULT_MESSAGE_LEFT.len());
+            &format!("{DEFAULT_MESSAGE_LEFT}{DEFAULT_MESSAGE_RIGHT:>remainder_len$}")
         } else {
             &self.current_message.text
         };

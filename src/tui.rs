@@ -29,6 +29,13 @@ use terminal::Terminal;
 use tuistatus::TuiStatus;
 use uicomponents::{FilterBar, MessageBar, SearchBar, StatusBar, UIComponent, View};
 
+#[derive(Default, Eq, PartialEq, Clone, Copy)]
+pub enum Target {
+    #[default]
+    Memory,
+    Files,
+}
+
 #[derive(Eq, PartialEq, Default, Clone, Copy)]
 pub enum Mode {
     Filter,
@@ -69,6 +76,7 @@ pub struct Tui {
     message_bar: MessageBar,
     operation: Option<Operation>,
     multiplier: Option<String>,
+    target: Target,
 }
 
 impl Drop for Tui {
@@ -84,6 +92,17 @@ impl Drop for Tui {
 }
 
 impl Tui {
+    fn toggle_target(&mut self) -> Result<(), Error> {
+        self.target = match self.target {
+            Target::Memory => Target::Files,
+            Target::Files => Target::Memory,
+        };
+
+        self.view.load(self.target)?;
+
+        Ok(())
+    }
+
     fn append_multiplier(&mut self, digit: char) {
         if let Some(multiplier) = self.multiplier.as_mut() {
             multiplier.push(digit);
@@ -147,7 +166,7 @@ impl Tui {
 
         tui.view.set_hilight_selected_line(true);
         tui.handle_resize_command(size);
-        tui.view.load()?;
+        tui.view.load(tui.target)?;
         tui.refresh_status();
 
         Terminal::set_title("systemctl-manager")?;
@@ -229,8 +248,21 @@ impl Tui {
                 self.view.scroll_to_start();
                 self.message_bar.clear_message();
             }
-            Edit(Insert('z')) => {
+            Edit(Insert('p')) => {
                 self.message_bar.update_message("filter mode: i/a/I/A | search mode: / | dismiss: ctrl+c/esc | confirm: enter | search next: n | search prev: N");
+            }
+            Edit(Insert('o')) => {
+                self.message_bar.update_message("status: q | start: w | stop: e | reload: r | restart: t | enable: y | disable: u");
+            }
+            Edit(Insert('f')) => {
+                self.filter_bar.clear_value();
+                self.view.scroll_to_start();
+
+                // WARNING:
+                // This line executes a command that can fail.
+                // If the program runs until here, there should be no reason for that command to fail,
+                // because this same operation was already executed during the creation of the Tui struct.
+                let _ = self.toggle_target();
             }
             Edit(Insert('n')) => {
                 self.view.search_next();

@@ -2,7 +2,7 @@ use std::{io::Error, process::Command};
 
 mod service;
 
-use super::{super::super::AnnotatedString, Highlighter};
+use super::{super::super::AnnotatedString, Highlighter, Target};
 use crate::prelude::*;
 pub use service::Service;
 
@@ -35,17 +35,29 @@ impl Buffer {
         self.get_active_collection().len()
     }
 
-    pub fn load(terminal_width: usize) -> Result<Self, Error> {
-        let output = Command::new("systemctl")
-            .args([
-                "list-units",
-                "--type=service",
-                "--all",
-                "--no-pager",
-                "--no-legend",
-                "--plain",
-            ])
-            .output()?;
+    pub fn load(terminal_width: usize, target: Target) -> Result<Self, Error> {
+        let output = if target == Target::Memory {
+            Command::new("systemctl")
+                .args([
+                    "list-units",
+                    "--type=service",
+                    "--all",
+                    "--no-pager",
+                    "--no-legend",
+                    "--plain",
+                ])
+                .output()?
+        } else {
+            Command::new("systemctl")
+                .args([
+                    "list-unit-files",
+                    "--type=service",
+                    "--no-pager",
+                    "--no-legend",
+                    "--plain",
+                ])
+                .output()?
+        };
 
         let stdout = String::from_utf8_lossy(&output.stdout);
         let mut services = Vec::new();

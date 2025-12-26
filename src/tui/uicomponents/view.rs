@@ -5,7 +5,7 @@ mod highlighter;
 mod searchdirection;
 mod searchinfo;
 
-use super::super::{Mode, Terminal, TuiStatus, command::Move};
+use super::super::{Mode, Target, Terminal, TuiStatus, command::Move};
 use super::UIComponent;
 use crate::prelude::*;
 use buffer::Buffer;
@@ -34,8 +34,8 @@ impl View {
         self.buffer.get_selected_service_name(self.location)
     }
 
-    pub fn load(&mut self) -> Result<(), Error> {
-        let buffer = Buffer::load(self.size.width)?;
+    pub fn load(&mut self, target: Target) -> Result<(), Error> {
+        let buffer = Buffer::load(self.size.width, target)?;
 
         self.buffer = buffer;
         self.set_needs_redraw(true);
